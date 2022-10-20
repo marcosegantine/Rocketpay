@@ -23,19 +23,6 @@ function setCardType(type) {
 globalThis.setCardType = setCardType
 
 
-const cardNumber = document.querySelector('#card-number')
-const cardNumberPattern = {
-  mask: "0000 0000 0000 0000"
-}
-const cardNumberMasked = IMask(cardNumber, cardNumberPattern)
-
-
-const cardHolder = document.querySelector('#card-holder')
-const cardHolderPattern = {
-  mask: "aaaaaaaaaaaaaaaaaaaa"
-}
-const cardHolderMasked = IMask(cardHolder, cardHolderPattern)
-
 
 const expirationDate = document.querySelector('#expiration-date')
 const expirationDatePattern = {
@@ -61,4 +48,56 @@ const securityCodePattern = {
   mask: "0000"
 }
 const securityCodeMasked = IMask(securityCode, securityCodePattern)
+
+securityCodeMasked.on('accept', () => {
+  updateSecurityCode(securityCodeMasked)
+})
+function updateSecurityCode(code) {
+  const ccSecurity = document.querySelector(".cc-security .value")
+  ccSecurity.innerText = code.lenght === 0 ? "123" : code.value
+}
+
+
+const cardNumber = document.querySelector('#card-number')
+const cardNumberPattern = {
+  mask: [
+    {
+      mask: "0000 0000 0000 0000",
+      regex:/^4\d{0,15}/,
+      cardtype: 'visa',
+    },
+      {
+        mask: "0000 0000 0000 0000",
+        regex:/(^5[1-5]\d{0,2}|^22[2-9]\d|^2[3,7]\d{0,2}\d{0,12})/,
+        cardtype: 'mastercard',
+    },
+      {
+        mask: "0000 0000 0000 0000",
+        cardtype: 'default',
+    }
+  ],
+  dispatch: function(appended, dynamicMasked) {
+    const number = (dynamicMasked.value + appended).replace(/\D/g,"");
+    const foundMask = dynamicMasked.compiledMasks.find(function (item) {
+      return number.match(item.regex)
+    })
+    return foundMask
+  },
+}
+const cardNumberMasked = IMask(cardNumber, cardNumberPattern)
+
+const addCard = document.querySelector('#add-card')
+addCard.addEventListener('click', submitCard)
+
+function submitCard(e) {
+  e.preventDefault()
+  console.log('voce adicionou um cartao')
+}
+
+
+const cardHolderInput = document.querySelector("#card-holder")
+cardHolderInput.addEventListener('input', () => {
+  const ccHolder = document.querySelector('.cc-holder .value')
+  ccHolder.innerText = cardHolderInput.value.length === 0 ? 'FULANO DA SILVA' : cardHolderInput.value;
+})
 
