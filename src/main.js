@@ -3,7 +3,7 @@ import IMask from "imask"
 
 const ccBgColor1 = document.querySelector(".cc-bg g g:nth-child(1) path")
 const ccBgColor2 = document.querySelector(".cc-bg g g:nth-child(2) path")
-const ccLogo = document.querySelector('.cc-logo-img')
+const ccBandeira = document.querySelector(".cc-bandeira")
 
 
 function setCardType(type) {
@@ -16,7 +16,7 @@ function setCardType(type) {
   
   ccBgColor1.setAttribute("fill", colors[type][0])
   ccBgColor2.setAttribute("fill", colors[type][1])
-  ccLogo.setAttribute("src", `cc-${type}.svg`)
+  ccBandeira.setAttribute("src", `cc-${type}.svg`)
   
 }
 
@@ -42,6 +42,15 @@ const expirationDatePattern = {
 }
 const expirationDateMasked = IMask(expirationDate, expirationDatePattern)
 
+expirationDateMasked.on("accept", () => {
+  updateExpirationDate(expirationDateMasked.value)
+})
+
+function updateExpirationDate(date) {
+  const ccExpiration = document.querySelector('.cc-expiration .value')
+  ccExpiration.innerText = date.length === 0 ? '12/31' : date
+}
+
 
 const securityCode = document.querySelector('#security-code')
 const securityCodePattern = {
@@ -50,11 +59,11 @@ const securityCodePattern = {
 const securityCodeMasked = IMask(securityCode, securityCodePattern)
 
 securityCodeMasked.on('accept', () => {
-  updateSecurityCode(securityCodeMasked)
+  updateSecurityCode(securityCodeMasked.value)
 })
 function updateSecurityCode(code) {
-  const ccSecurity = document.querySelector(".cc-security .value")
-  ccSecurity.innerText = code.lenght === 0 ? "123" : code.value
+  const ccSecurity = document.querySelector('.cc-security .value')
+  ccSecurity.innerText = code.length === 0 ? '123' : code
 }
 
 
@@ -84,14 +93,18 @@ const cardNumberPattern = {
     return foundMask
   },
 }
+
 const cardNumberMasked = IMask(cardNumber, cardNumberPattern)
 
-const addCard = document.querySelector('#add-card')
-addCard.addEventListener('click', submitCard)
-
-function submitCard(e) {
-  e.preventDefault()
-  console.log('voce adicionou um cartao')
+cardNumberMasked.on('accept', () => {
+  const cardType = cardNumberMasked.masked.currentMask.cardtype
+  setCardType(cardType)
+  console.log(cardType)
+  updateCardNumber(cardNumberMasked.value)
+})
+function updateCardNumber(number) {
+  const ccNumber = document.querySelector('.cc-number')
+  ccNumber.innerText = number.length === 0 ? "1234 5678 9012 3456" : number
 }
 
 
@@ -101,3 +114,11 @@ cardHolderInput.addEventListener('input', () => {
   ccHolder.innerText = cardHolderInput.value.length === 0 ? 'FULANO DA SILVA' : cardHolderInput.value;
 })
 
+
+const addCard = document.querySelector('#add-card')
+addCard.addEventListener('click', submitCard)
+
+function submitCard(e) {
+  e.preventDefault()
+  console.log('voce adicionou um cartao')
+}
